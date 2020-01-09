@@ -1,0 +1,7 @@
+exp:
+  name: 'gan_mnist'
+  experiment_dir: 'experiments/'
+dataset: {}
+model: {}
+trainer:
+  batch_size: 4  
