@@ -24,6 +24,13 @@ def setup_tf_config(config: DotMap):
 
     return is_master
 
+def load_data():
+    (train_x, train_y), _ = tf.keras.datasets.mnist.load_data()
+    
+    print(train_x.shape, train_y.shape)
+
+    return { 'train_x': train_x, 'train_y': train_y }
+
 def main(use_horovod: bool, gpus: int, config_path: str, checkpoint: int) -> None:
     config = process_config(config_path, use_horovod, gpus, checkpoint)
     
@@ -36,6 +43,7 @@ def main(use_horovod: bool, gpus: int, config_path: str, checkpoint: int) -> Non
             config.exp.source_dir,
             ignore=lambda src, names: {'datasets', '__pycache__', '.git', 'experiments', 'venv'})
     
+    data = load_data()
 
 
 if __name__ == '__main__':
