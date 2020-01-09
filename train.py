@@ -3,6 +3,7 @@ import os
 import shutil
 
 import tensorflow as tf
+from keras import backend as K
 from dotmap import DotMap
 
 from utils.config import process_config
@@ -11,17 +12,19 @@ from model_trainer_builder import build_model_and_trainer
 
 def setup_tf_config(config: DotMap):
 
+    tf_config = tf.ConfigProto()
+
     if config.trainer.use_horovod:
         import horovod.keras as hvd
-        hvd.init()
-        tf.config.experimental.set_visible_devices(str(hvd.local_rank()))
-        for device in tf.config.experimental.list_physical_devices('GPU'):
-            tf.config.experimental.set_memory_growth(device, True)
-    
-    is_master = not config.trainer.use_horovod
 
+        hvd.init()
+        tf_config.gpu_options.allow_growth = True
+        tf_config.gpu_options.visible_device_list = str(hvd.local_rank())
+
+    is_master = not config.trainer.use_horovod
     if not is_master:
         import horovod.keras as hvd
+
         is_master = hvd.rank() == 0
 
     return is_master
@@ -38,6 +41,9 @@ def main(use_horovod: bool, gpus: int, config_path: str, checkpoint: int) -> Non
             config.exp.source_dir,
             ignore=lambda src, names: {'datasets', '__pycache__', '.git', 'experiments', 'venv'})
     
+    tf_sess = tf.Session(config=tf_config)
+    K.set_session(tf_sess)
+
     data_loader = MNISTDataLoader(config)
 
     train_gen = data_loader.get_train_data_generator()

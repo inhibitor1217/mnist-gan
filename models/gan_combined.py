@@ -1,7 +1,7 @@
 from typing import Tuple
 
-from tensorflow.keras import Model, Input
-from tensorflow.keras.optimizers import Adam
+from keras import Model, Input
+from keras.optimizers import Adam
 
 from base.base_model import BaseModel
 from utils.layer import named

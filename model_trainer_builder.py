@@ -1,6 +1,6 @@
 from dotmap import DotMap
 from typing import Tuple
-from tensorflow.keras import Model
+from keras import Model
 
 from base.base_data_loader import BaseDataLoader
 from base.base_model import BaseModel

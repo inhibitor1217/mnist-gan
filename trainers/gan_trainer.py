@@ -1,11 +1,13 @@
-from dotmap import DotMap, Optional
+import os
+from typing import Optional
+from dotmap import DotMap
 from collections import defaultdict
 from datetime import datetime
 
 import numpy as np
 from PIL import Image
-from tensorflow.keras import Model
-from tensorflow.keras.callbacks import LearningRateScheduler
+from keras import Model
+from keras.callbacks import LearningRateScheduler
 
 from base.base_trainer import BaseTrainer
 from base.base_data_loader import BaseDataLoader

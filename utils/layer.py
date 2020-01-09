@@ -1,7 +1,7 @@
 from typing import Optional
 
-from tensorflow.keras.engine import Layer
-from tensorflow.keras.layers import Lambda
+from keras.engine import Layer
+from keras.layers import Lambda
 
 
 def named(name: str) -> Layer:

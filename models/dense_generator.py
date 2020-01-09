@@ -1,8 +1,8 @@
 from typing import Tuple
 
-from tensorflow.keras import Model, Input
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.optimizers import Adam
+from keras import Model, Input
+from keras.layers import Dense
+from keras.optimizers import Adam
 
 from base.base_model import BaseModel
 
