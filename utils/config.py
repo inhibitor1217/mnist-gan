@@ -9,7 +9,7 @@ def get_config_from_yml(yml_file: str) -> DotMap:
     # parse the configurations from the config json file provided
     with open(yml_file, "r") as config_file:
         config_dict = yaml.load(config_file, Loader=yaml.FullLoader)
-    print(config_dict)
+        
     # convert the dictionary to a namespace using bunch lib
     config = DotMap(config_dict)
 
