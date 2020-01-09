@@ -40,10 +40,16 @@ def main(use_horovod: bool, gpus: int, config_path: str, checkpoint: int) -> Non
     
     data_loader = MNISTDataLoader(config)
 
-    # _, trainer = build_model_and_trainer(config, data_loader)
+    train_gen = data_loader.get_train_data_generator()
 
-    # print(f'Start Training Experiment {config.exp.name}')
-    # trainer.train()
+    for _ in range(10):
+        x, y = next(train_gen)
+        print(x.shape, y.shape)
+
+    _, trainer = build_model_and_trainer(config, data_loader)
+
+    print(f'Start Training Experiment {config.exp.name}')
+    trainer.train()
 
 
 if __name__ == '__main__':

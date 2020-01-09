@@ -50,24 +50,20 @@ class MNISTDataLoader(BaseDataLoader):
         
         # create train dataflow
         self.train_dataflow: DataFlow = data_to_dataflow(data.train_x, data.train_y, config)
+        self.train_dataflow_size = data.train_x.shape[0]
 
         # create test dataflow
         self.test_dataflow:  DataFlow = data_to_dataflow(data.test_x,  data.test_y,  config)
-    
-    def get_train_data_generator(self) -> Generator:
-        raise NotImplementedError
+        self.test_dataflow_size = data.test_x.shape[0]
 
-    def get_validation_data_generator(self) -> Generator:
-        raise NotImplementedError
+    def get_train_data_generator(self) -> Generator:
+        return self.train_dataflow.get_data()
 
     def get_test_data_generator(self) -> Generator:
-        raise NotImplementedError
+        return self.test_dataflow.get_data()
 
     def get_train_data_size(self) -> int:
-        raise NotImplementedError
-
-    def get_validation_data_size(self) -> int:
-        raise NotImplementedError
+        return self.train_dataflow_size
 
     def get_test_data_size(self) -> int:
-        raise NotImplementedError
+        return self.test_dataflow_size

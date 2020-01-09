@@ -5,6 +5,21 @@ from tensorflow.keras import Model
 from base.base_data_loader import BaseDataLoader
 from base.base_model import BaseModel
 from base.base_trainer import BaseTrainer
+from models.dense_generator import DenseGenerator
+from models.dense_discriminator import DenseDiscriminator
+from models.with_load_weights import WithLoadWeights, WithLoadOptimizerWeights
+from models.gan_combined import GANCombined
+from trainers.gan_trainer import GANTrainer
 
 def build_model_and_trainer(config: DotMap, data_loader: BaseDataLoader) -> Tuple[Model, BaseTrainer]:
-    pass
+    generator_builder = DenseGenerator(config)
+    discriminator_builder = DenseDiscriminator(config)
+
+    g = generator_builder.define_model(model_name='g')
+    d, d_parallel = WithLoadOptimizerWeights(discriminator_builder, model_name='d').build_model(model_name='d')
+    combined, combined_parallel = WithLoadWeights(GANCombined(config), model_name='combined') \
+        .build_model(g=g, d=d, model_name='combined')
+
+    trainer = GANTrainer(g, d, d_parallel, combined, combined_parallel, data_loader, config)
+
+    return combined, trainer
