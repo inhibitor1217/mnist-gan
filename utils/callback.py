@@ -9,8 +9,6 @@ from keras import backend as K
 from keras.callbacks import TensorBoard, Callback, ModelCheckpoint
 from tensorflow.python.summary.writer.writer import FileWriter
 
-from utils.telegram_noti import send_noti_to_telegram
-
 
 class ScalarCollageTensorBoard(TensorBoard):
     def __init__(self, log_dir='./logs', histogram_freq=0, batch_size=32, write_graph=True, write_grads=False,
@@ -106,12 +104,6 @@ class TrainProgressAlertCallback(Callback):
     def on_epoch_begin(self, epoch: int, logs: Optional[dict] = None) -> None:
         # zero base to one base
         self.epoch = epoch + 1
-
-    def on_train_begin(self, logs: Optional[int] = None) -> None:
-        send_noti_to_telegram(f'{self.experiment_name} train started for {self.total_epochs} epochs')
-
-    def on_train_end(self, logs: Optional[int] = None) -> None:
-        send_noti_to_telegram(f'{self.experiment_name} train ended at {self.epoch}/{self.total_epochs} epochs')
 
 
 class ModelCheckpointWithKeepFreq(ModelCheckpoint):

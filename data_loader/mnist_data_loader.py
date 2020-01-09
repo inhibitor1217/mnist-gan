@@ -14,6 +14,12 @@ def load_data() -> DotMap:
     # print(train_x.shape, train_y.shape)
     # print(test_x.shape,  test_y.shape)
 
+    train_data_size, img_width, img_height = train_x.shape
+    test_data_size, _, _ = test_x.shape
+
+    train_x = train_x.reshape((train_data_size, img_width * img_height))
+    test_x  = test_x.reshape((test_data_size, img_width * img_height))
+
     data: DotMap = DotMap({ 
         'train_x': train_x, 
         'train_y': train_y, 

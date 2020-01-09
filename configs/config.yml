@@ -11,10 +11,7 @@ model:
     beta1: 0.9
 trainer:
   num_epochs: 200
-  batch_size: 4  
-  fake_pool_size: 50
-  label_smoothing: false
-  use_lr_decay: false
+  batch_size: 600
   save_checkpoint_freq: 10
   keep_checkpoint_freq: 50
   predicted_dir: 'predicted/'

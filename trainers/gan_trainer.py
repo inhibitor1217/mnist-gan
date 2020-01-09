@@ -11,7 +11,7 @@ from keras.callbacks import LearningRateScheduler
 
 from base.base_trainer import BaseTrainer
 from base.base_data_loader import BaseDataLoader
-from utils.callback import ModelCheckpointWithKeepFreq, OptimizerSaver, ModelSaver, TerminateOnAnyNaN, \
+from utils.callback import ModelCheckpointWithKeepFreq, OptimizerSaver, ModelSaver, \
     TrainProgressAlertCallback, ScalarCollageTensorBoard
 from utils.image import denormalize_image
 
@@ -181,7 +181,7 @@ class GANTrainer(BaseTrainer):
                         if deliminator == ' ':
                             deliminator = ',\t'
 
-                    print_str += f", time: {datetime.datetime.now() - start_time}"
+                    print_str += f", time: {datetime.now() - start_time}"
                     print(print_str, flush=True)
 
                     for metric_name, metric_value in zip(metric_names, metric_values):
@@ -195,7 +195,7 @@ class GANTrainer(BaseTrainer):
 
             self.on_epoch_end(epoch, epoch_logs)
 
-            if (epoch + 1) % self.config.trainer.pred_freq == 0:
+            if (epoch + 1) % self.config.trainer.predict_freq == 0:
                 self.sample_images(epoch)
 
         self.on_train_end()
@@ -206,18 +206,14 @@ class GANTrainer(BaseTrainer):
 
         images = []
         for _ in range(8):
-            noise = np.random.normal(0, 1, (self.config.trainer.batch_size, 100))
+            noise = np.random.normal(0, 1, (1, 64))
+            image = self.g.predict(noise)
+            image = image.reshape((28, 28))
+            image = denormalize_image(image)
+            images.append(image)
 
-            generated_images = self.generator.predict(noise)
-
-            for image in generated_images:
-                image = np.squeeze(image, axis=-1)
-                images.append(denormalize_image(image))
-
-        save_batch_size = self.config.trainer.pred_save_batch_size
-        for i in range(0, len(images), save_batch_size):
-            concat_images = np.concatenate(images[i:i + save_batch_size], axis=0)
-            Image.fromarray(concat_images).save(f"{output_dir}/{i // save_batch_size}.png")
+        for i, images in enumerate(images):
+            Image.fromarray(image).save(f"{output_dir}/{i}.png")
     
     def on_batch_begin(self, batch: int, logs: Optional[dict] = None) -> None:
         for model_name in self.model_callbacks:

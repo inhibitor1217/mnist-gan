@@ -27,6 +27,9 @@ def setup_tf_config(config: DotMap):
 
         is_master = hvd.rank() == 0
 
+    tf_sess = tf.Session(config=tf_config)
+    K.set_session(tf_sess)
+
     return is_master
 
 def main(use_horovod: bool, gpus: int, config_path: str, checkpoint: int) -> None:
@@ -40,17 +43,10 @@ def main(use_horovod: bool, gpus: int, config_path: str, checkpoint: int) -> Non
             os.path.abspath(os.path.curdir),
             config.exp.source_dir,
             ignore=lambda src, names: {'datasets', '__pycache__', '.git', 'experiments', 'venv'})
-    
-    tf_sess = tf.Session(config=tf_config)
-    K.set_session(tf_sess)
 
     data_loader = MNISTDataLoader(config)
 
     train_gen = data_loader.get_train_data_generator()
-
-    for _ in range(10):
-        x, y = next(train_gen)
-        print(x.shape, y.shape)
 
     _, trainer = build_model_and_trainer(config, data_loader)
 

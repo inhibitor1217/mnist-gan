@@ -1,7 +1,7 @@
 from typing import Tuple
 
 from keras import Model, Input
-from keras.layers import Flatten, Dense
+from keras.layers import Dense
 from keras.optimizers import Adam
 
 from base.base_model import BaseModel
@@ -9,10 +9,9 @@ from base.base_model import BaseModel
 class DenseDiscriminator(BaseModel):
     def define_model(self, model_name: str) -> Model:
         # input
-        _input = Input(shape=(None, 28, 28), name=f'{model_name}_input')
+        _input = Input(shape=(784,), name=f'{model_name}_input')
 
-        X = Flatten()(_input)
-        X = Dense(256, activation='relu', name=f'{model_name}_dense_1')(X)
+        X = Dense(256, activation='relu', name=f'{model_name}_dense_1')(_input)
         X = Dense(1, activation='sigmoid', name=f'{model_name}_dense_2')(X)
 
         model = Model(inputs=_input, outputs=X, name=f'{model_name}')
