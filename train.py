@@ -6,6 +6,8 @@ import tensorflow as tf
 from dotmap import DotMap
 
 from utils.config import process_config
+from data_loader.mnist_data_loader import MNISTDataLoader
+from model_trainer_builder import build_model_and_trainer
 
 def setup_tf_config(config: DotMap):
 
@@ -24,13 +26,6 @@ def setup_tf_config(config: DotMap):
 
     return is_master
 
-def load_data():
-    (train_x, train_y), _ = tf.keras.datasets.mnist.load_data()
-    
-    print(train_x.shape, train_y.shape)
-
-    return { 'train_x': train_x, 'train_y': train_y }
-
 def main(use_horovod: bool, gpus: int, config_path: str, checkpoint: int) -> None:
     config = process_config(config_path, use_horovod, gpus, checkpoint)
     
@@ -43,7 +38,12 @@ def main(use_horovod: bool, gpus: int, config_path: str, checkpoint: int) -> Non
             config.exp.source_dir,
             ignore=lambda src, names: {'datasets', '__pycache__', '.git', 'experiments', 'venv'})
     
-    data = load_data()
+    data_loader = MNISTDataLoader(config)
+
+    # _, trainer = build_model_and_trainer(config, data_loader)
+
+    # print(f'Start Training Experiment {config.exp.name}')
+    # trainer.train()
 
 
 if __name__ == '__main__':
