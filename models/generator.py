@@ -6,28 +6,7 @@ from base.base_model import BaseModel
 
 class Generator(BaseModel):
     def define_model(self, model_name):
-        inputs = Input(shape=(64,))
-        x = Dense(7 * 7 * 128, activation='relu')(inputs)
-        x = Reshape((7, 7, 128))(x)
-        x = UpSampling2D(size=2)(x)
-
-        x = Conv2D(64, kernel_size=3, strides=1, padding='same')(x)
-        x = BatchNormalization()(x)
-        x = Activation('relu')(x)
-
-        x = Conv2D(32, kernel_size=3, strides=1, padding='same')(x)
-        x = BatchNormalization()(x)
-        x = Activation('relu')(x)
-        x = UpSampling2D(size=2)(x)
-
-        x = Conv2D(16, kernel_size=3, strides=1, padding='same')(x)
-        x = BatchNormalization()(x)
-        x = Activation('relu')(x)
-
-        x = Conv2D(1, kernel_size=3, strides=1, padding='same')(x)
-        generated_image = Activation('tanh')(x)
-
-        return Model(inputs=inputs, outputs=generated_image, name=model_name)
+        raise NotImplementedError
 
     def build_model(self, model_name):
         raise NotImplementedError
