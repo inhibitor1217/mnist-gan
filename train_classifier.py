@@ -2,6 +2,7 @@ import argparse
 import os
 import shutil
 
+import numpy as np
 import tensorflow as tf
 from keras import backend as K
 from dotmap import DotMap
@@ -46,8 +47,6 @@ def main(use_horovod: bool, gpus: int, config_path: str, checkpoint: int) -> Non
 
     data_loader = MNISTDataLoader(config)
 
-    train_gen = data_loader.get_train_data_generator()
-
     _, trainer = build_model_and_trainer(config, data_loader)
 
     print(f'Start Training Experiment {config.exp.name}')
@@ -60,7 +59,7 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument('--horovod', action='store_true', help='use horovod')
     ap.add_argument('--gpus', type=int, default=1, help='number of gpus to use if horovod is disabled')
-    ap.add_argument('--config', type=str, default='configs/config.yml', help='config file to use')
+    ap.add_argument('--config', type=str, default='configs/classifier_config.yml', help='config file to use')
     ap.add_argument('--checkpoint', type=int, default=0, help='checkpoint to continue')
 
     args = vars(ap.parse_args())

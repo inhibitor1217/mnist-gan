@@ -1,5 +1,4 @@
 from typing import Generator, Optional
-
 from tensorpack import DataFlow
 
 class GeneratorToDataFlow(DataFlow):
@@ -16,3 +15,20 @@ class GeneratorToDataFlow(DataFlow):
         if self.generator_size is None:
             raise NotImplementedError
         return self.generator_size
+
+class ProcessorDataFlow(DataFlow):
+    def __init__(self, ds, processor):
+        super().__init__()
+        self.ds = ds
+        self.processor = processor
+
+    def reset_state(self):
+        super().reset_state()
+        self.ds.reset_state()
+    
+    def __iter__(self):
+        for data in self.ds.__iter__():
+            yield self.processor(data)
+    
+    def __len__(self):
+        return self.ds.__len__()
