@@ -1,6 +1,12 @@
+import os
+
 from models.with_load_weights import WithLoadWeights, WithLoadOptimizerWeights
 from models.classifier import Classifier
+from models.discriminator import Discriminator
+from models.generator import Generator
+from models.gan_combined import GANCombined
 from trainers.classifier_trainer import ClassifierTrainer
+from trainers.gan_trainer import GANTrainer
 
 def build_model_and_trainer(config, data_loader):
     if config.model.type == 'classifier':
@@ -12,4 +18,22 @@ def build_model_and_trainer(config, data_loader):
         return model, trainer
 
     elif config.model.type == 'dcgan':
-        pass
+        g_model_builder = Generator(config)
+        d_model_builder = Discriminator(config)
+        c_model_builder = Classifier(config)
+
+        g = g_model_builder.define_model('generator')
+        d, parallel_d = d_model_builder.build_model('discriminator')
+        c, _ = c_model_builder.build_model('classifier')
+
+        # Load weights to classifier
+        checkpoint_path = './experiments/classifier_mnist/checkpoints/0050-classifier.hdf5'
+        if os.path.exists(checkpoint_path):
+            c.load_weights(checkpoint_path)
+
+        combined_model_builder = GANCombined(config)
+
+        combined, parallel_combined = combined_model_builder.build_model(g, d, c, 'gan_combined')
+        trainer = GANTrainer(data_loader, config, g, d, parallel_d, c, combined, parallel_combined)
+
+        return combined, trainer

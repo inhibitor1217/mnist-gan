@@ -16,7 +16,8 @@ from utils.callback import ModelCheckpointWithKeepFreq, OptimizerSaver, ModelSav
 from utils.image import denormalize_image
 
 class GANTrainer(BaseTrainer):
-    def __init__(self, data_loader: BaseDataLoader, config: DotMap) -> None:
+    def __init__(self, data_loader: BaseDataLoader, config: DotMap, \
+                g, d, parallel_d, c, combined, combined_parallel) -> None:
         super().__init__(data_loader, config)
 
         
