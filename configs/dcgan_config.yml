@@ -4,10 +4,9 @@ exp:
 model:
   type: 'dcgan'
   generator:
-    type: 'dense'
     lr: 0.0002
+    weight_classifier: 1
   discriminator:
-    type: 'dense'
     lr: 0.0002
     beta1: 0.9
 trainer:
