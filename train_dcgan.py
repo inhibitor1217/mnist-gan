@@ -46,8 +46,6 @@ def main(use_horovod: bool, gpus: int, config_path: str, checkpoint: int) -> Non
 
     data_loader = MNISTDataLoader(config)
 
-    train_gen = data_loader.get_train_data_generator()
-
     _, trainer = build_model_and_trainer(config, data_loader)
 
     print(f'Start Training Experiment {config.exp.name}')
