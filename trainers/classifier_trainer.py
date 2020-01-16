@@ -100,9 +100,13 @@ class ClassifierTrainer(BaseTrainer):
 
     def train(self):
         train_data = self.data_loader.get_train_data_generator()
-        batch_size = self.config.trainer.batch_sizes
+        
 
-        valid_data = self.data_loader.get_validation_data_generator()
+    def predict_valid(self, epoch):
+        print(f"Prediction for valid set at epoch {epoch}", flush=True)
+
+    def predict_test(self):
+        print(f"Prediction for test set")
 
     def on_batch_begin(self, batch, logs=None):
         for model_name in self.model_callbacks:
