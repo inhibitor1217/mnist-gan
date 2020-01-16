@@ -99,14 +99,15 @@ class ClassifierTrainer(BaseTrainer):
                     "model_name": model_name,
                 })     
 
+    def metric_string(self, metric_name, metric_value):
+        if 'accuracy' in metric_name:
+            return f"{metric_name}={metric_value*100:.1f}%"
+        elif 'loss' in metric_name:
+            return f"{metric_name}={metric_value:.4f}"
+        else:
+            return f"{metric_name}={metric_value}"
+
     def train(self):
-        def metric_string(metric_name, metric_value):
-            if 'accuracy' in metric_name:
-                return f"{metric_name}={metric_value*100:.1f}%"
-            elif 'loss' in metric_name:
-                return f"{metric_name}={metric_value:.4f}"
-            else:
-                return f"{metric_name}={metric_value}"
    
         epochs = self.config.trainer.num_epochs
         start_time = datetime.now()
@@ -142,7 +143,7 @@ class ClassifierTrainer(BaseTrainer):
                         epoch_logs[metric_name] += metric_logs[metric_name] * batch_size # weighted average (batch size could be different!)
 
                 iter_str   = f"[Epoch {epoch + 1}/{epochs}] [Batch {step}/{self.data_loader.get_train_step_size()}]"
-                metric_str = ', '.join([metric_string(name, value) for name, value in metric_logs.items()])
+                metric_str = ', '.join([self.metric_string(name, value) for name, value in metric_logs.items()])
                 time_str   = f"time: {datetime.now() - start_time}"
                 print(', '.join([iter_str, metric_str, time_str]), flush=True)
 
@@ -154,7 +155,8 @@ class ClassifierTrainer(BaseTrainer):
             epoch_logs = dict(epoch_logs)
 
             if (epoch + 1) % self.config.trainer.predict_freq == 0:
-                self.predict_validation(epoch + 1)
+                valid_logs = self.predict_validation(epoch + 1)
+                epoch_logs.update(valid_logs)
 
             self.on_epoch_end(epoch, epoch_logs)
         
@@ -167,11 +169,51 @@ class ClassifierTrainer(BaseTrainer):
         valid_data = self.data_loader.get_validation_data_generator()
         valid_size = self.data_loader.get_validation_data_size()
 
+        avg_loss     = 0.
+        avg_accuracy = 0.
+
+        for x, y in valid_data:
+            assert x.shape[0] == y.shape[0]
+            batch_size = x.shape[0]
+
+            [loss, accuracy] = self.model.test_on_batch(x, y)
+
+            # weighted average
+            avg_loss     += loss     * batch_size
+            avg_accuracy += accuracy * batch_size
+
+        avg_loss     /= valid_size
+        avg_accuracy /= valid_size
+
+        metric_logs = {
+            'loss/valid':     avg_loss,
+            'accuracy/valid': avg_accuracy
+        }
+        metric_str = ', '.join([self.metric_string(name, value) for name, value in metric_logs.items()])
+        print(metric_str, flush=True)
+
+        return metric_logs
+
     def predict_test(self):
         print(f"Prediction for test set")
 
         test_data = self.data_loader.get_test_data_generator()
         test_size = self.data_loader.get_test_data_size()
+
+        avg_accuracy = 0.
+
+        for x, y in test_data:
+            assert x.shape[0] == y.shape[0]
+            batch_size = x.shape[0]
+
+            [_, accuracy] = self.model.test_on_batch(x, y)
+
+            # weighted average
+            avg_accuracy += accuracy * batch_size
+
+        avg_accuracy /= test_size
+
+        print(f"Test accuracy: {avg_accuracy}")
 
     def on_batch_begin(self, batch, logs=None):
         for model_name in self.model_callbacks:
