@@ -42,11 +42,6 @@ class MNISTDataLoader(BaseDataLoader):
         self.valid_batch_size = config.trainer.batch_size
         self.test_batch_size  = config.trainer.batch_size
 
-        # Adjust data size by batch_size
-        self.train_data_size = math.ceil(self.train_data_size / self.train_batch_size)
-        self.valid_data_size = math.ceil(self.valid_data_size / self.valid_batch_size)
-        self.test_data_size  = math.ceil(self.test_data_size  / self.test_batch_size)
-
     def _data_to_generator(self, x, y, shuffle):
         assert x.shape[0] == y.shape[0]       
         
@@ -91,3 +86,12 @@ class MNISTDataLoader(BaseDataLoader):
 
     def get_test_data_size(self):
         return self.test_data_size
+
+    def get_train_step_size(self):
+        return math.ceil(self.train_data_size / self.train_batch_size)
+
+    def get_validation_step_size(self):
+        return math.ceil(self.valid_data_size / self.valid_batch_size)
+
+    def get_test_step_size(self):
+        return math.ceil(self.test_data_size  / self.test_batch_size)

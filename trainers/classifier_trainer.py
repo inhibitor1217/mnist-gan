@@ -1,5 +1,6 @@
 import os
 from collections import defaultdict
+from datetime import datetime
 
 from keras.callbacks import LearningRateScheduler
 
@@ -96,17 +97,81 @@ class ClassifierTrainer(BaseTrainer):
                     "verbose": True,
                     "do_validation": False,
                     "model_name": model_name,
-                })
+                })     
 
     def train(self):
-        train_data = self.data_loader.get_train_data_generator()
-        
+        def metric_string(metric_name, metric_value):
+            if 'accuracy' in metric_name:
+                return f"{metric_name}={metric_value*100:.1f}%"
+            elif 'loss' in metric_name:
+                return f"{metric_name}={metric_value:.4f}"
+            else:
+                return f"{metric_name}={metric_value}"
+   
+        epochs = self.config.trainer.num_epochs
+        start_time = datetime.now()
 
-    def predict_valid(self, epoch):
-        print(f"Prediction for valid set at epoch {epoch}", flush=True)
+        self.on_train_begin()
+        for epoch in range(self.config.trainer.epoch_to_continue, epochs):
+            self.on_epoch_begin(epoch, {})
+            epoch_logs = { 'loss/train': 0., 'accuracy/train': 0. }
+
+            train_data = self.data_loader.get_train_data_generator()
+            
+            for idx, (x, y) in enumerate(train_data):
+                step = idx + 1
+
+                assert x.shape[0] == y.shape[0]
+                batch_size = x.shape[0]
+
+                batch_logs = {'batch': step, 'size': batch_size}
+                self.on_batch_begin(step, batch_logs)
+
+                [loss, accuracy] = self.model.train_on_batch(x, y)
+
+                metric_logs = {
+                    'loss/train': loss,
+                    'accuracy/train': accuracy
+                }
+
+                batch_logs.update(metric_logs)
+
+                # Update epoch log accordingly
+                for metric_name in metric_logs.keys():
+                    if metric_name in epoch_logs:
+                        epoch_logs[metric_name] += metric_logs[metric_name] * batch_size # weighted average (batch size could be different!)
+
+                iter_str   = f"[Epoch {epoch + 1}/{epochs}] [Batch {step}/{self.data_loader.get_train_step_size()}]"
+                metric_str = '\t'.join([metric_string(name, value) for name, value in metric_logs.items()])
+                time_str   = f"time: {datetime.now() - start_time}"
+                print(', '.join([iter_str, metric_str, time_str]), flush=True)
+
+                self.on_batch_end(step, batch_logs)
+
+            # sum to average
+            for k in epoch_logs:
+                epoch_logs[k] /= self.data_loader.get_train_data_size()
+            epoch_logs = dict(epoch_logs)
+
+            if (epoch + 1) % self.config.trainer.predict_freq == 0:
+                self.predict_validation(epoch + 1)
+
+            self.on_epoch_end(epoch, epoch_logs)
+        
+        self.predict_test()
+        self.on_train_end()
+
+    def predict_validation(self, epoch):
+        print(f"Prediction for validation set at epoch {epoch}", flush=True)
+
+        valid_data = self.data_loader.get_validation_data_generator()
+        valid_size = self.data_loader.get_validation_data_size()
 
     def predict_test(self):
         print(f"Prediction for test set")
+
+        test_data = self.data_loader.get_test_data_generator()
+        test_size = self.data_loader.get_test_data_size()
 
     def on_batch_begin(self, batch, logs=None):
         for model_name in self.model_callbacks:

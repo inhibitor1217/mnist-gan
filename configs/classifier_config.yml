@@ -10,9 +10,8 @@ model:
   clipnorm: 10
 trainer:
   num_epochs: 100
-  batch_size: 1729
+  batch_size: 128
   save_checkpoint_freq: 25
   keep_checkpoint_freq: 50
-  predicted_dir: 'predicted/'
-  predict_freq: 25
+  predict_freq: 5
   use_horovod: true

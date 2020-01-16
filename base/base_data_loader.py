@@ -30,3 +30,15 @@ class BaseDataLoader:
     @abc.abstractmethod
     def get_test_data_size(self) -> int:
         raise NotImplementedError
+
+    @abc.abstractmethod
+    def get_train_step_size(self) -> int:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get_validation_step_size(self) -> int:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get_test_step_size(self) -> int:
+        raise NotImplementedError
