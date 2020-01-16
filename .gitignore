@@ -4,3 +4,4 @@ datasets/
 experiments/
 MNIST_data/
 venv/
+test_images/

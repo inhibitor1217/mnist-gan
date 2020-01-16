@@ -8,9 +8,9 @@ from keras.utils import multi_gpu_model
 
 
 class BaseModel:
-    def __init__(self, config: DotMap) -> None:
+    def __init__(self, config) -> None:
         super().__init__()
-        self.config: DotMap = config
+        self.config = config
 
     @abc.abstractmethod
     def define_model(self, **kargs) -> Model:

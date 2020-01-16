@@ -49,7 +49,7 @@ class ClassifierTrainer(BaseTrainer):
             # model saver
             self.model_callbacks["serial_model"].append(
                 ModelCheckpointWithKeepFreq(
-                    filepath=os.path.join(self.config.exp.checkpoints_dir, "{epoch:04d}-combined.hdf5"),
+                    filepath=os.path.join(self.config.exp.checkpoints_dir, "{epoch:04d}-classifier.hdf5"),
                     keep_checkpoint_freq=self.config.trainer.keep_checkpoint_freq,
                     save_checkpoint_freq=self.config.trainer.save_checkpoint_freq,
                     save_best_only=False,
@@ -82,7 +82,7 @@ class ClassifierTrainer(BaseTrainer):
 
         # initialize callbacks by setting model and params
         epochs = self.config.trainer.num_epochs
-        steps_per_epoch = self.data_loader.get_train_data_size() // self.config.trainer.batch_size
+        steps_per_epoch = self.data_loader.get_train_step_size()
         for model_name in self.model_callbacks:
             model = eval(f"self.{model_name}")
 
