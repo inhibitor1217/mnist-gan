@@ -2,6 +2,7 @@ exp:
   name: 'gan_mnist'
   experiment_dir: 'experiments/'
 model:
+  type: 'dcgan'
   generator:
     type: 'dense'
     lr: 0.0002

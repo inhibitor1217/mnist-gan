@@ -2,8 +2,8 @@ exp:
   name: 'classifier_mnist'
   experiment_dir: 'experiments/'
 model:
+  type: 'classifier'
   lr: 0.0002
-  dropout: true
   beta1: 0.9
   beta2: 0.999
   clipvalue: 10
