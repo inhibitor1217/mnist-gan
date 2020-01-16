@@ -1,4 +1,5 @@
 import os
+import math
 from datetime import datetime
 
 import numpy as np
@@ -41,13 +42,20 @@ class MNISTDataLoader(BaseDataLoader):
         self.y_test  = np.zeros((self.test_data_size, NUM_CLASSES), dtype=float)
         self.y_test [np.arange(self.test_data_size), y_test_raw[:self.test_data_size]] = 1.
 
+        train_batch_size = valid_batch_size = test_batch_size = config.trainer.batch_size
+
         # Create dataflow
         self.train_dataflow = self._data_to_dataflow(self.x_train, self.y_train, 
-                        shuffle=True,  batch_size=config.trainer.batch_size)
+                        shuffle=True,  batch_size=train_batch_size)
         self.valid_dataflow = self._data_to_dataflow(self.x_valid, self.y_valid,
-                        shuffle=False, batch_size=config.trainer.batch_size)
+                        shuffle=False, batch_size=valid_batch_size)
         self.test_dataflow  = self._data_to_dataflow(self.x_test,  self.y_test,
-                        shuffle=False, batch_size=config.trainer.batch_size)
+                        shuffle=False, batch_size=test_batch_size)
+
+        # Adjust data size by batch_size
+        self.train_data_size = math.ceil(self.train_data_size / train_batch_size)
+        self.valid_data_size = math.ceil(self.valid_data_size / valid_batch_size)
+        self.test_data_size  = math.ceil(self.test_data_size  / test_batch_size)
 
     def _data_to_generator(self, x, y, shuffle):
         seed = (id(self) + os.getpid() + int(datetime.now().strftime("%Y%m%d%H%M%S%f"))) % 4294967295

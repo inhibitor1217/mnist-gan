@@ -1,18 +1,11 @@
-from dotmap import DotMap
-from typing import Tuple
-from keras import Model
-
-from base.base_data_loader import BaseDataLoader
-from base.base_model import BaseModel
-from base.base_trainer import BaseTrainer
-from models.generator import Generator
-from models.discriminator import Discriminator
 from models.with_load_weights import WithLoadWeights, WithLoadOptimizerWeights
-from models.gan_combined import GANCombined
-from trainers.gan_trainer import GANTrainer
+from models.classifier import Classifier
 
-def build_model_and_trainer(config: DotMap, data_loader: BaseDataLoader) -> Tuple[Model, BaseTrainer]:
+def build_model_and_trainer(config, data_loader):
     if config.model.type == 'classifier':
-        pass
+        model_builder = Classifier(config)
+        model, parallel_model = WithLoadWeights(model_builder, model_name='classifier') \
+            .build_model(model_name='classifier')
+        
     elif config.model.type == 'dcgan':
         pass
