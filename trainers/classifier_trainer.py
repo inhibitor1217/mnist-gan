@@ -142,7 +142,7 @@ class ClassifierTrainer(BaseTrainer):
                         epoch_logs[metric_name] += metric_logs[metric_name] * batch_size # weighted average (batch size could be different!)
 
                 iter_str   = f"[Epoch {epoch + 1}/{epochs}] [Batch {step}/{self.data_loader.get_train_step_size()}]"
-                metric_str = '\t'.join([metric_string(name, value) for name, value in metric_logs.items()])
+                metric_str = ', '.join([metric_string(name, value) for name, value in metric_logs.items()])
                 time_str   = f"time: {datetime.now() - start_time}"
                 print(', '.join([iter_str, metric_str, time_str]), flush=True)
 
