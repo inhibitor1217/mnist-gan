@@ -13,3 +13,4 @@ Pillow
 dotmap
 python-telegram-bot
 python-prctl
+PyQt5==5.9.2
