@@ -187,6 +187,8 @@ class GANTrainer(BaseTrainer):
                 self.sample_images(epoch + 1)
 
             self.on_epoch_end(epoch, epoch_logs)
+
+        self.sample_final()
         self.on_train_end()
 
     def sample_images(self, epoch):
@@ -202,6 +204,24 @@ class GANTrainer(BaseTrainer):
         os.makedirs(output_dir, exist_ok=True)
         filename = f"{output_dir}/{epoch}.png"
         imageio.imsave(filename, img_gens)
+
+    def sample_final(self):
+        img_out = np.zeros((280, 280), dtype=np.uint8)
+        
+        for i in range(10):
+            label = np.zeros((10, 1, 1, 10), dtype=float)
+            label[np.arange(10), :, :, np.arange(10)] = 1.
+            noise = np.random.normal(0, 1, (10, 1, 1, 54))
+            g_input = np.concatenate([label, noise], axis=-1)
+
+            img = self.g.predict_on_batch(g_input)
+            img_gens = denormalize_image(np.squeeze(np.concatenate(img, axis=1), axis=-1))
+            img_out[i*28:(i+1)*28] = img_gens
+        
+        output_dir = f"{self.config.exp.experiment_dir}/{self.config.exp.name}/samples/"
+        os.makedirs(output_dir, exist_ok=True)
+        filename = f"{output_dir}/result.png"
+        imageio.imsave(filename, img_out)
     
     def on_batch_begin(self, batch: int, logs: Optional[dict] = None) -> None:
         for model_name in self.model_callbacks:
