@@ -153,7 +153,7 @@ class GANTrainer(BaseTrainer):
                     g_loss_adversarial, 
                     g_loss_classifier,
                     g_loss_l1
-                ] = self.combined.train_on_batch([label, noise], [real_prediction, y])
+                ] = self.combined.train_on_batch([label, noise], [real_prediction, y, x])
 
                 metric_logs = {
                     'd/real': d_loss_real,
@@ -192,23 +192,27 @@ class GANTrainer(BaseTrainer):
         self.on_train_end()
 
     def sample_images(self, epoch):
-        print(f"Generating sample images at epoch {epoch} ...")
-        label = np.zeros((10, 1, 1, 10), dtype=float)
-        label[np.arange(10), :, :, np.arange(10)] = 1.
-        noise = np.random.normal(0, 1, (10, 1, 1, 54))
-        g_input = np.concatenate([label, noise], axis=-1)
+        img_out = np.zeros((28*16, 280), dtype=np.uint8)
+        
+        for i in range(16):
+            label = np.zeros((10, 1, 1, 10), dtype=float)
+            label[np.arange(10), :, :, np.arange(10)] = 1.
+            noise = np.random.normal(0, 1, (10, 1, 1, 54))
+            g_input = np.concatenate([label, noise], axis=-1)
 
-        img = self.g.predict_on_batch(g_input)
-        img_gens = denormalize_image(np.squeeze(np.concatenate(img, axis=1), axis=-1))
+            img = self.g.predict_on_batch(g_input)
+            img_gens = denormalize_image(np.squeeze(np.concatenate(img, axis=1), axis=-1))
+            img_out[i*28:(i+1)*28] = img_gens
+        
         output_dir = f"{self.config.exp.experiment_dir}/{self.config.exp.name}/samples/"
         os.makedirs(output_dir, exist_ok=True)
         filename = f"{output_dir}/{epoch}.png"
-        imageio.imsave(filename, img_gens)
+        imageio.imsave(filename, img_out)
 
     def sample_final(self):
-        img_out = np.zeros((280, 280), dtype=np.uint8)
+        img_out = np.zeros((28*16, 280), dtype=np.uint8)
         
-        for i in range(10):
+        for i in range(16):
             label = np.zeros((10, 1, 1, 10), dtype=float)
             label[np.arange(10), :, :, np.arange(10)] = 1.
             noise = np.random.normal(0, 1, (10, 1, 1, 54))

@@ -11,21 +11,21 @@ model:
   clipnorm: 10
   # ------------
   generator:
-    lr: 0.0002
+    lr: 0.0001
     weight_classifier: 1
-    weight_l1: 0
+    weight_l1: 1
     beta1: 0.9
     clipvalue: 10
     clipnorm: 10
   discriminator:
-    lr: 0.0002
+    lr: 0.0004
     beta1: 0.9
     clipvalue: 10
     clipnorm: 10
 trainer:
-  num_epochs: 200
+  num_epochs: 300
   batch_size: 256
-  save_checkpoint_freq: 10
-  keep_checkpoint_freq: 50
-  predict_freq: 20
+  save_checkpoint_freq: 20
+  keep_checkpoint_freq: 20
+  predict_freq: 5
   use_horovod: true

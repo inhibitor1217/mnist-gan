@@ -33,7 +33,8 @@ def build_model_and_trainer(config, data_loader):
 
         combined_model_builder = GANCombined(config)
 
-        combined, parallel_combined = combined_model_builder.build_model(g, d, c, 'gan_combined')
+        combined, parallel_combined = WithLoadWeights(combined_model_builder, model_name='combined') \
+            .build_model(g=g, d=d, c=c, model_name='combined')
         trainer = GANTrainer(data_loader, config, g, d, parallel_d, c, combined, parallel_combined)
 
         return combined, trainer

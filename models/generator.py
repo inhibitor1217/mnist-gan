@@ -1,5 +1,5 @@
 from keras import Input, Model
-from keras.layers import Conv2DTranspose, BatchNormalization, ReLU
+from keras.layers import Conv2DTranspose, BatchNormalization
 
 from base.base_model import BaseModel
 
@@ -8,21 +8,17 @@ class Generator(BaseModel):
         _input = Input(shape=(1, 1, 64), name=f'{model_name}_input')
 
         x = Conv2DTranspose(filters=64, kernel_size=3, strides=1,
-                        use_bias=False, name=f'{model_name}_deconv_1',)(_input)
+                        activation='relu', name=f'{model_name}_deconv_1',)(_input)
         x = BatchNormalization()(x)
-        x = ReLU()(x)
         x = Conv2DTranspose(filters=16, kernel_size=5, strides=1,
-                        use_bias=False, name=f'{model_name}_deconv_2')(x)
+                        activation='relu', name=f'{model_name}_deconv_2')(x)
         x = BatchNormalization()(x)
-        x = ReLU()(x)
         x = Conv2DTranspose(filters=8, kernel_size=2, strides=2,
-                        use_bias=False, name=f'{model_name}_deconv_3')(x)
+                        activation='relu', name=f'{model_name}_deconv_3')(x)
         x = BatchNormalization()(x)
-        x = ReLU()(x)
         x = Conv2DTranspose(filters=8, kernel_size=2, strides=2,
-                        use_bias=False, name=f'{model_name}_deconv_4')(x)
+                        activation='relu', name=f'{model_name}_deconv_4')(x)
         x = BatchNormalization()(x)
-        x = ReLU()(x)
         x = Conv2DTranspose(filters=1, kernel_size=3, strides=1, padding='same',
                         activation='tanh', name=f'{model_name}_deconv_5')(x)
 
