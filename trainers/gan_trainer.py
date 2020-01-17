@@ -119,12 +119,12 @@ class GANTrainer(BaseTrainer):
         for epoch in range(self.config.trainer.epoch_to_continue, epochs):
             self.on_epoch_begin(epoch, {})
             epoch_logs = {
-                'loss/d_real_train': 0,
-                'loss/d_fake_train': 0,
-                'loss/g_total_train': 0,
-                'loss/g_adversarial_train': 0,
-                'loss/g_classifier_train': 0,
-                'loss/g_l1_train': 0
+                'd/real': 0,
+                'd/fake': 0,
+                'g/total': 0,
+                'g/adversarial': 0,
+                'g/classifier': 0,
+                'g/l1': 0
             }
             train_data = self.data_loader.get_train_data_generator()
             for idx, (x, y) in enumerate(train_data):
@@ -153,15 +153,15 @@ class GANTrainer(BaseTrainer):
                     g_loss_adversarial, 
                     g_loss_classifier,
                     g_loss_l1
-                ] = self.combined.train_on_batch([label, noise], [real_prediction, y, x])
+                ] = self.combined.train_on_batch([label, noise], [real_prediction, y])
 
                 metric_logs = {
-                    'loss/d_real_train': d_loss_real,
-                    'loss/d_fake_train': d_loss_fake,
-                    'loss/g_total_train': g_loss_total,
-                    'loss/g_adversarial_train': g_loss_adversarial,
-                    'loss/g_classifier_train': g_loss_classifier,
-                    'loss/g_l1_train': g_loss_l1
+                    'd/real': d_loss_real,
+                    'd/fake': d_loss_fake,
+                    'g/total': g_loss_total,
+                    'g/adversarial': g_loss_adversarial,
+                    'g/classifier': g_loss_classifier,
+                    'g/l1': g_loss_l1
                 }
 
                 batch_logs.update(metric_logs)
