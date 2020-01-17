@@ -3,6 +3,7 @@ from typing import Optional
 from dotmap import DotMap
 from collections import defaultdict
 from datetime import datetime
+import imageio
 
 import numpy as np
 from PIL import Image
@@ -180,13 +181,25 @@ class GANTrainer(BaseTrainer):
                 epoch_logs[k] /= self.data_loader.get_train_data_size()
             epoch_logs = dict(epoch_logs)
 
-            # TODO: perform prediction using sample_images
+            if (epoch + 1) % self.config.trainer.predict_freq == 0:
+                self.sample_images(epoch + 1)
 
             self.on_epoch_end(epoch, epoch_logs)
         self.on_train_end()
 
     def sample_images(self, epoch):
-        raise NotImplementedError
+        print(f"Generating sample images at epoch {epoch} ...")
+        label = np.zeros((10, 1, 1, 10), dtype=float)
+        label[np.arange(10), :, :, np.arange(10)] = 1.
+        noise = np.random.normal(0, 1, (10, 1, 1, 54))
+        g_input = np.concatenate([label, noise], axis=-1)
+
+        img = self.g.predict_on_batch(g_input)
+        img_gens = denormalize_image(np.squeeze(np.concatenate(img, axis=1), axis=-1))
+        output_dir = f"{self.config.exp.experiment_dir}/{self.config.exp.name}/samples/"
+        os.makedirs(output_dir, exist_ok=True)
+        filename = f"{output_dir}/{epoch}.png"
+        imageio.imsave(filename, img_gens)
     
     def on_batch_begin(self, batch: int, logs: Optional[dict] = None) -> None:
         for model_name in self.model_callbacks:
