@@ -105,9 +105,7 @@ class GANTrainer(BaseTrainer):
                 })
 
     def metric_string(self, metric_name, metric_value):
-        if 'accuracy' in metric_name:
-            return f"{metric_name}={metric_value*100:.1f}%"
-        elif 'loss' in metric_name:
+        if 'loss' in metric_name:
             return f"{metric_name}={metric_value:.4f}"
         else:
             return f"{metric_name}={metric_value}"
@@ -126,9 +124,7 @@ class GANTrainer(BaseTrainer):
                 'loss/g_total_train': 0,
                 'loss/g_adversarial_train': 0,
                 'loss/g_classifier_train': 0,
-                'loss/g_l1_train': 0,
-                'accuracy/d_real_train': 0,
-                'accuracy/d_fake_train': 0
+                'loss/g_l1_train': 0
             }
             train_data = self.data_loader.get_train_data_generator()
             for idx, (x, y) in enumerate(train_data):
@@ -146,11 +142,11 @@ class GANTrainer(BaseTrainer):
                 fake = self.g.predict(g_input)
 
                 # Label smoothing
-                real_prediction       = np.random.uniform( 0.8,  1.0, size=(batch_size, 1))
-                fake_prediction       = np.random.uniform(-1.0, -0.8, size=(batch_size, 1))
+                real_prediction       = np.random.uniform(0.9, 1.0, size=(batch_size, 1))
+                fake_prediction       = np.random.uniform(0.0, 0.1, size=(batch_size, 1))
 
-                [d_loss_real, d_accuracy_real] = self.d.train_on_batch(x,    real_prediction)    # Train on real images
-                [d_loss_fake, d_accuracy_fake] = self.d.train_on_batch(fake, fake_prediction)    # Train on fake images
+                d_loss_real = self.d.train_on_batch(x,    real_prediction)    # Train on real images
+                d_loss_fake = self.d.train_on_batch(fake, fake_prediction)    # Train on fake images
 
                 [
                     g_loss_total, 
@@ -165,9 +161,7 @@ class GANTrainer(BaseTrainer):
                     'loss/g_total_train': g_loss_total,
                     'loss/g_adversarial_train': g_loss_adversarial,
                     'loss/g_classifier_train': g_loss_classifier,
-                    'loss/g_l1_train': g_loss_l1,
-                    'accuracy/d_real_train': d_accuracy_real,
-                    'accuracy/d_fake_train': d_accuracy_fake
+                    'loss/g_l1_train': g_loss_l1
                 }
 
                 batch_logs.update(metric_logs)

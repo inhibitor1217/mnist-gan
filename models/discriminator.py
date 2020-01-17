@@ -19,7 +19,7 @@ class Discriminator(BaseModel):
         x = BatchNormalization()(x)
         x = Flatten()(x)
         x = Dense(32, activation='relu')(x)
-        x = Dense(1, activation='tanh')(x)
+        x = Dense(1, activation='sigmoid')(x)
 
         model = Model(inputs=_input, outputs=x, name=model_name)
 
@@ -34,6 +34,6 @@ class Discriminator(BaseModel):
         optimizer = self.process_optimizer(optimizer)
 
         parallel_model = self.multi_gpu_model(model)
-        parallel_model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
+        parallel_model.compile(optimizer=optimizer, loss='binary_crossentropy')
 
         return model, parallel_model
