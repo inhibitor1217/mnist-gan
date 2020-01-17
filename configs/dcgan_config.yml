@@ -13,6 +13,7 @@ model:
   generator:
     lr: 0.0002
     weight_classifier: 1
+    weight_l1: 1
     beta1: 0.9
     clipvalue: 10
     clipnorm: 10

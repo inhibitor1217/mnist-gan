@@ -126,6 +126,7 @@ class GANTrainer(BaseTrainer):
                 'loss/g_total_train': 0,
                 'loss/g_adversarial_train': 0,
                 'loss/g_classifier_train': 0,
+                'loss/g_l1_train': 0,
                 'accuracy/d_real_train': 0,
                 'accuracy/d_fake_train': 0
             }
@@ -150,7 +151,12 @@ class GANTrainer(BaseTrainer):
                 [d_loss_real, d_accuracy_real] = self.d.train_on_batch(x,    real_prediction)    # Train on real images
                 [d_loss_fake, d_accuracy_fake] = self.d.train_on_batch(fake, fake_prediction)    # Train on fake images
 
-                [g_loss_total, g_loss_adversarial, g_loss_classifier] = self.combined.train_on_batch([label, noise], [real_prediction, y])
+                [
+                    g_loss_total, 
+                    g_loss_adversarial, 
+                    g_loss_classifier,
+                    g_loss_l1
+                ] = self.combined.train_on_batch([label, noise], [real_prediction, y, x])
 
                 metric_logs = {
                     'loss/d_real_train': d_loss_real,
@@ -158,6 +164,7 @@ class GANTrainer(BaseTrainer):
                     'loss/g_total_train': g_loss_total,
                     'loss/g_adversarial_train': g_loss_adversarial,
                     'loss/g_classifier_train': g_loss_classifier,
+                    'loss/g_l1_train': g_loss_l1,
                     'accuracy/d_real_train': d_accuracy_real,
                     'accuracy/d_fake_train': d_accuracy_fake
                 }
