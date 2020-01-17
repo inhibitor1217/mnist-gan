@@ -145,8 +145,9 @@ class GANTrainer(BaseTrainer):
 
                 fake = self.g.predict(g_input)
 
-                real_prediction       = np.ones ((batch_size, 1))
-                fake_prediction       = np.zeros((batch_size, 1))
+                # Label smoothing
+                real_prediction       = np.random.uniform( 0.8,  1.0, size=(batch_size, 1))
+                fake_prediction       = np.random.uniform(-1.0, -0.8, size=(batch_size, 1))
 
                 [d_loss_real, d_accuracy_real] = self.d.train_on_batch(x,    real_prediction)    # Train on real images
                 [d_loss_fake, d_accuracy_fake] = self.d.train_on_batch(fake, fake_prediction)    # Train on fake images
