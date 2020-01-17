@@ -3,12 +3,24 @@ exp:
   experiment_dir: 'experiments/'
 model:
   type: 'dcgan'
+  # --- TEMP ---
+  lr: 0.0002
+  beta1: 0.9
+  beta2: 0.999
+  clipvalue: 10
+  clipnorm: 10
+  # ------------
   generator:
     lr: 0.0002
     weight_classifier: 1
+    beta1: 0.9
+    clipvalue: 10
+    clipnorm: 10
   discriminator:
     lr: 0.0002
     beta1: 0.9
+    clipvalue: 10
+    clipnorm: 10
 trainer:
   num_epochs: 200
   batch_size: 128

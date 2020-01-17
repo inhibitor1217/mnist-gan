@@ -118,11 +118,15 @@ class GANTrainer(BaseTrainer):
 
         self.on_train_begin()
         for epoch in range(self.config.trainer.epoch_to_continue, epochs):
-            self.on_epoch_begin()
+            self.on_epoch_begin(epoch, {})
             epoch_logs = {
                 'loss/d_real_train': 0,
                 'loss/d_fake_train': 0,
-                'loss/g_train': 0
+                'loss/g_total_train': 0,
+                'loss/g_adversarial_train': 0,
+                'loss/g_classifier_train': 0,
+                'accuracy/d_real_train': 0,
+                'accuracy/d_fake_train': 0
             }
             train_data = self.data_loader.get_train_data_generator()
             for idx, (x, y) in enumerate(train_data):
@@ -133,21 +137,52 @@ class GANTrainer(BaseTrainer):
                 batch_logs = {'batch': step, 'size': batch_size}
                 self.on_batch_begin(step, batch_logs)
 
-                # TODO: format gaussian noise and y into g_input
+                label   = np.resize(y, (batch_size, 1, 1, 10))
+                noise   = np.random.normal(0, 1, (batch_size, 1, 1, 54))
+                g_input = np.concatenate([label, noise], axis=-1)
 
                 fake = self.g.predict(g_input)
 
-                # TODO: create real and fake labels
-                # TODO: train discriminator
+                real_prediction       = np.ones ((batch_size, 1))
+                fake_prediction       = np.zeros((batch_size, 1))
 
-                # TODO: train generator
+                [d_loss_real, d_accuracy_real] = self.d.train_on_batch(x,    real_prediction)    # Train on real images
+                [d_loss_fake, d_accuracy_fake] = self.d.train_on_batch(fake, fake_prediction)    # Train on fake images
 
-                # TODO: update metrics
+                [g_loss_total, g_loss_adversarial, g_loss_classifier] = self.combined.train_on_batch([label, noise], [real_prediction, y])
+
+                metric_logs = {
+                    'loss/d_real_train': d_loss_real,
+                    'loss/d_fake_train': d_loss_fake,
+                    'loss/g_total_train': g_loss_total,
+                    'loss/g_adversarial_train': g_loss_adversarial,
+                    'loss/g_classifier_train': g_loss_classifier,
+                    'accuracy/d_real_train': d_accuracy_real,
+                    'accuracy/d_fake_train': d_accuracy_fake
+                }
+
+                batch_logs.update(metric_logs)
+
+                # Update epoch log accordingly
+                for metric_name in metric_logs.keys():
+                    if metric_name in epoch_logs:
+                        epoch_logs[metric_name] += metric_logs[metric_name] * batch_size # weighted average (batch size could be different!)
+
+                iter_str   = f"[Epoch {epoch + 1}/{epochs}] [Batch {step}/{self.data_loader.get_train_step_size()}]"
+                metric_str = ', '.join([self.metric_string(name, value) for name, value in metric_logs.items()])
+                time_str   = f"time: {datetime.now() - start_time}"
+                print(', '.join([iter_str, metric_str, time_str]), flush=True)
 
                 self.on_batch_end(step, batch_logs)
 
-            # TODO: perform prediction
-            self.on_epoch_end()
+            # sum to average
+            for k in epoch_logs:
+                epoch_logs[k] /= self.data_loader.get_train_data_size()
+            epoch_logs = dict(epoch_logs)
+
+            # TODO: perform prediction using sample_images
+
+            self.on_epoch_end(epoch, epoch_logs)
         self.on_train_end()
 
     def sample_images(self, epoch):

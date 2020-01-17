@@ -19,7 +19,7 @@ class Discriminator(BaseModel):
         x = BatchNormalization()(x)
         x = Flatten()(x)
         x = Dense(32, activation='relu')(x)
-        x = Dense(1, activation='softmax')(x)
+        x = Dense(1, activation='sigmoid')(x)
 
         model = Model(inputs=_input, outputs=x, name=model_name)
 

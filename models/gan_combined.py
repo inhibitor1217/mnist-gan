@@ -26,7 +26,9 @@ class GANCombined(BaseModel):
 
     def build_model(self, g, d, c, model_name):
         model = self.define_model(g, d, c, model_name)
-        optimizer = Adam(self.config.model.generator.lr)
+        optimizer = Adam(self.config.model.generator.lr, beta_1=self.config.model.generator.beta1,
+                        clipvalue=self.config.model.generator.clipvalue,
+                        clipnorm=self.config.model.generator.clipnorm)
         parallel_model = self.multi_gpu_model(model)
         parallel_model.compile(optimizer=optimizer, loss=['binary_crossentropy', 'binary_crossentropy'],
                     loss_weights=[1, self.config.model.generator.weight_classifier])
