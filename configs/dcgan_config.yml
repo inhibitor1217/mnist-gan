@@ -12,18 +12,18 @@ model:
   # ------------
   generator:
     lr: 0.0001
-    weight_classifier: 1
-    weight_l1: 1
+    # weight_classifier: 1
+    # weight_l1: 1
     beta1: 0.9
     clipvalue: 10
     clipnorm: 10
   discriminator:
-    lr: 0.0004
+    lr: 0.0001
     beta1: 0.9
     clipvalue: 10
     clipnorm: 10
 trainer:
-  num_epochs: 300
+  num_epochs: 100
   batch_size: 256
   save_checkpoint_freq: 20
   keep_checkpoint_freq: 20

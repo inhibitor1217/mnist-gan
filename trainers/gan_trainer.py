@@ -6,6 +6,7 @@ from datetime import datetime
 import imageio
 
 import numpy as np
+import tensorflow as tf
 from PIL import Image
 from keras import Model
 from keras.callbacks import LearningRateScheduler
@@ -122,7 +123,7 @@ class GANTrainer(BaseTrainer):
                 'd/real': 0,
                 'd/fake': 0,
                 'g/total': 0,
-                'g/adversarial': 0,
+                # 'g/adversarial': 0,
                 'g/classifier': 0,
                 'g/l1': 0
             }
@@ -135,11 +136,12 @@ class GANTrainer(BaseTrainer):
                 batch_logs = {'batch': step, 'size': batch_size}
                 self.on_batch_begin(step, batch_logs)
 
-                label   = np.resize(y, (batch_size, 1, 1, 10))
-                noise   = np.random.normal(0, 1, (batch_size, 1, 1, 54))
-                g_input = np.concatenate([label, noise], axis=-1)
+                # label   = np.resize(y, (batch_size, 1, 1, 10))
+                noise   = np.random.normal(0, 1, (batch_size, 1, 1, 64))
+                # g_input = np.concatenate([label, noise], axis=-1)
 
-                fake = self.g.predict(g_input)
+                # fake = self.g.predict(g_input)
+                fake = self.g.predict(noise)
 
                 # Label smoothing
                 real_prediction       = np.random.uniform(0.9, 1.0, size=(batch_size, 1))
@@ -148,20 +150,21 @@ class GANTrainer(BaseTrainer):
                 d_loss_real = self.d.train_on_batch(x,    real_prediction)    # Train on real images
                 d_loss_fake = self.d.train_on_batch(fake, fake_prediction)    # Train on fake images
 
-                [
-                    g_loss_total, 
-                    g_loss_adversarial, 
-                    g_loss_classifier,
-                    g_loss_l1
-                ] = self.combined.train_on_batch([label, noise], [real_prediction, y, x])
+                # [
+                #     g_loss_total, 
+                #     g_loss_adversarial, 
+                #     g_loss_classifier,
+                #     g_loss_l1
+                # ] = self.combined.train_on_batch([label, noise], [real_prediction, y, x])
+                g_loss_total = self.combined.train_on_batch(noise, real_prediction)
 
                 metric_logs = {
                     'd/real': d_loss_real,
                     'd/fake': d_loss_fake,
                     'g/total': g_loss_total,
-                    'g/adversarial': g_loss_adversarial,
-                    'g/classifier': g_loss_classifier,
-                    'g/l1': g_loss_l1
+                    # 'g/adversarial': g_loss_adversarial,
+                    # 'g/classifier': g_loss_classifier,
+                    # 'g/l1': g_loss_l1
                 }
 
                 batch_logs.update(metric_logs)
@@ -184,48 +187,31 @@ class GANTrainer(BaseTrainer):
             epoch_logs = dict(epoch_logs)
 
             if (epoch + 1) % self.config.trainer.predict_freq == 0:
-                self.sample_images(epoch + 1)
+                sampled = self.sample_images()
+                output_dir = f"{self.config.exp.experiment_dir}/{self.config.exp.name}/samples/"
+                os.makedirs(output_dir, exist_ok=True)
+                filename = f"{output_dir}/{epoch + 1}.png"
+                imageio.imsave(filename, sampled)
 
             self.on_epoch_end(epoch, epoch_logs)
 
-        self.sample_final()
         self.on_train_end()
 
-    def sample_images(self, epoch):
+    def sample_images(self):
         img_out = np.zeros((28*16, 280), dtype=np.uint8)
         
         for i in range(16):
-            label = np.zeros((10, 1, 1, 10), dtype=float)
-            label[np.arange(10), :, :, np.arange(10)] = 1.
-            noise = np.random.normal(0, 1, (10, 1, 1, 54))
-            g_input = np.concatenate([label, noise], axis=-1)
+            # label = np.zeros((10, 1, 1, 10), dtype=float)
+            # label[np.arange(10), :, :, np.arange(10)] = 1.
+            noise = np.random.normal(0, 1, (10, 1, 1, 64))
+            # g_input = np.concatenate([label, noise], axis=-1)
 
-            img = self.g.predict_on_batch(g_input)
+            # img = self.g.predict_on_batch(g_input)
+            img = self.g.predict_on_batch(noise)
             img_gens = denormalize_image(np.squeeze(np.concatenate(img, axis=1), axis=-1))
             img_out[i*28:(i+1)*28] = img_gens
-        
-        output_dir = f"{self.config.exp.experiment_dir}/{self.config.exp.name}/samples/"
-        os.makedirs(output_dir, exist_ok=True)
-        filename = f"{output_dir}/{epoch}.png"
-        imageio.imsave(filename, img_out)
 
-    def sample_final(self):
-        img_out = np.zeros((28*16, 280), dtype=np.uint8)
-        
-        for i in range(16):
-            label = np.zeros((10, 1, 1, 10), dtype=float)
-            label[np.arange(10), :, :, np.arange(10)] = 1.
-            noise = np.random.normal(0, 1, (10, 1, 1, 54))
-            g_input = np.concatenate([label, noise], axis=-1)
-
-            img = self.g.predict_on_batch(g_input)
-            img_gens = denormalize_image(np.squeeze(np.concatenate(img, axis=1), axis=-1))
-            img_out[i*28:(i+1)*28] = img_gens
-        
-        output_dir = f"{self.config.exp.experiment_dir}/{self.config.exp.name}/samples/"
-        os.makedirs(output_dir, exist_ok=True)
-        filename = f"{output_dir}/result.png"
-        imageio.imsave(filename, img_out)
+        return img_out
     
     def on_batch_begin(self, batch: int, logs: Optional[dict] = None) -> None:
         for model_name in self.model_callbacks:

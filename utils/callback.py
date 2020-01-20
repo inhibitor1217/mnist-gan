@@ -9,7 +9,6 @@ from keras import backend as K
 from keras.callbacks import TensorBoard, Callback, ModelCheckpoint
 from tensorflow.python.summary.writer.writer import FileWriter
 
-
 class ScalarCollageTensorBoard(TensorBoard):
     def __init__(self, log_dir='./logs', histogram_freq=0, batch_size=32, write_graph=True, write_grads=False,
                  write_images=False, embeddings_freq=0, embeddings_layer_names=None, embeddings_metadata=None) -> None:

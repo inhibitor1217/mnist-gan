@@ -22,7 +22,6 @@ class Discriminator(BaseModel):
         x = Dense(1, activation='sigmoid')(x)
 
         model = Model(inputs=_input, outputs=x, name=model_name)
-        model.summary()
 
         return model
 
