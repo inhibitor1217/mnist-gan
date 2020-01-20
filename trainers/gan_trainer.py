@@ -19,13 +19,13 @@ from utils.image import denormalize_image
 
 class GANTrainer(BaseTrainer):
     def __init__(self, data_loader: BaseDataLoader, config: DotMap, \
-                g, d, parallel_d, c, combined, combined_parallel) -> None:
+                g, d, parallel_d, combined, combined_parallel) -> None:
         super().__init__(data_loader, config)
 
         self.g = g
         self.serial_d = d
         self.d = parallel_d
-        self.c = c
+        # self.c = c
         self.serial_combined = combined
         self.combined = combined_parallel
 

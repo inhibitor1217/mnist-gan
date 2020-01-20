@@ -6,8 +6,8 @@ from base.base_model import BaseModel
 from utils.layer import named
 
 class GANCombined(BaseModel):
-    def define_model(self, g, d, c, model_name):
-        c.trainable = False
+    def define_model(self, g, d, model_name):
+        # c.trainable = False
         d.trainable = False
 
         # _input_label = Input(shape=(1, 1, 10), name=f'{model_name}_input_label')
@@ -26,8 +26,8 @@ class GANCombined(BaseModel):
 
         return model
 
-    def build_model(self, g, d, c, model_name):
-        model = self.define_model(g, d, c, model_name)
+    def build_model(self, g, d, model_name):
+        model = self.define_model(g, d, model_name)
         optimizer = Adam(self.config.model.generator.lr, beta_1=self.config.model.generator.beta1,
                         clipvalue=self.config.model.generator.clipvalue,
                         clipnorm=self.config.model.generator.clipnorm)

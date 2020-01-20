@@ -18,7 +18,7 @@ model:
     clipvalue: 10
     clipnorm: 10
   discriminator:
-    lr: 0.0001
+    lr: 0.00005
     beta1: 0.9
     clipvalue: 10
     clipnorm: 10

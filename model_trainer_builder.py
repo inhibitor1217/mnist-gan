@@ -20,21 +20,23 @@ def build_model_and_trainer(config, data_loader):
     elif config.model.type == 'dcgan':
         g_model_builder = Generator(config)
         d_model_builder = Discriminator(config)
-        c_model_builder = Classifier(config)
+        # c_model_builder = Classifier(config)
 
         g = g_model_builder.define_model('generator')
         d, parallel_d = d_model_builder.build_model('discriminator')
-        c, _ = c_model_builder.build_model('classifier')
+        # c, _ = c_model_builder.build_model('classifier')
 
         # Load weights to classifier
-        checkpoint_path = './experiments/classifier_mnist/checkpoints/0050-classifier.hdf5'
-        if os.path.exists(checkpoint_path):
-            c.load_weights(checkpoint_path)
+        # checkpoint_path = './experiments/classifier_mnist/checkpoints/0050-classifier.hdf5'
+        # if os.path.exists(checkpoint_path):
+        #     c.load_weights(checkpoint_path)
 
         combined_model_builder = GANCombined(config)
 
         combined, parallel_combined = WithLoadWeights(combined_model_builder, model_name='combined') \
-            .build_model(g=g, d=d, c=c, model_name='combined')
-        trainer = GANTrainer(data_loader, config, g, d, parallel_d, c, combined, parallel_combined)
+            .build_model(g=g, d=d, model_name='combined')
+            # .build_model(g=g, d=d, c=c, model_name='combined')
+        # trainer = GANTrainer(data_loader, config, g, d, parallel_d, c, combined, parallel_combined)
+        trainer = GANTrainer(data_loader, config, g, d, parallel_d, combined, parallel_combined)
 
         return combined, trainer

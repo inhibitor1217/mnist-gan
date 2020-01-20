@@ -23,6 +23,7 @@ class Generator(BaseModel):
                         activation='tanh', name=f'{model_name}_deconv_5')(x)
 
         model = Model(inputs=_input, outputs=x, name=model_name)
+        model.summary()
 
         return model
 
